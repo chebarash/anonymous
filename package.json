@@ -1,0 +1,30 @@
+{
+  "name": "anonymous",
+  "version": "1.0.0",
+  "description": "Send completely anonymous messages to the channel",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chebarash/anonymous.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "channel",
+    "anonym"
+  ],
+  "author": "chebarash (https://github.com/chebarash)",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/chebarash/anonymous/issues"
+  },
+  "homepage": "https://github.com/chebarash/anonymous#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "telegraf": "^4.15.0"
+  }
+}
