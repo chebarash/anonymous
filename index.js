@@ -62,24 +62,16 @@ bot.on(message(), async (ctx) => {
 
 bot.action(`send`, async (ctx) => {
   await ctx.copyMessage(channel);
-  return await ctx.editMessageReplyMarkup({
-    inline_keyboard: [
-      [ctx.callbackQuery.message.reply_markup.inline_keyboard[0][0]],
-    ],
-  });
+  return await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 });
 
 bot.action(/^block/g, async (ctx) => {
   const [_, id, msg] = ctx.callbackQuery.data.split(`//`);
-  ctx.callbackQuery.message.reply_markup.inline_keyboard[0][1] = {
-    text: `send`,
-    callback_data: `send`,
-  };
   await blocked.insertOne({ id });
   await bot.telegram.deleteMessage(channel, msg);
-  return await ctx.editMessageReplyMarkup(
-    ctx.callbackQuery.message.reply_markup
-  );
+  return await ctx.editMessageReplyMarkup({
+    inline_keyboard: [[{ text: `send`, callback_data: `send` }]],
+  });
 });
 
 (async () => {
