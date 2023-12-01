@@ -62,7 +62,7 @@ bot.on(message(), async (ctx) => {
 
 bot.action(`send`, async (ctx) => {
   await ctx.copyMessage(channel);
-  return await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+  return await ctx.deleteMessage();
 });
 
 bot.action(/^block/g, async (ctx) => {
