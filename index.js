@@ -2,11 +2,17 @@ require(`dotenv`).config();
 const { Telegraf } = require(`telegraf`);
 const { message } = require("telegraf/filters");
 const express = require(`express`);
+const { MongoClient } = require("mongodb");
 
-const { CHANNEL, TOKEN, VERCEL_URL, PORT } = process.env;
+const { CHANNEL, ADMIN_ID, TOKEN, VERCEL_URL, PORT, MONGODB_URI } = process.env;
 
 const bot = new Telegraf(TOKEN);
 const app = express();
+const channel = parseInt(CHANNEL);
+
+const client = new MongoClient(MONGODB_URI);
+const database = client.db("anonymous");
+const blocked = database.collection("blocked");
 
 bot.use(async (_ctx, next) => {
   try {
@@ -17,7 +23,7 @@ bot.use(async (_ctx, next) => {
 });
 
 bot.start((ctx) =>
-  ctx.reply(`Send completely anonymous gossip to @puanonymous`)
+  ctx.reply(`Send completely anonymous messages to @puanonymous`)
 );
 
 bot.help((ctx) =>
@@ -27,11 +33,57 @@ bot.help((ctx) =>
   )
 );
 
-bot.on(message(), (ctx) => ctx.copyMessage(parseInt(CHANNEL)));
+bot.on(message(), async (ctx) => {
+  const { id } = ctx.from;
+  const isBlocked = await blocked.findOne({ id });
+  await ctx.copyMessage(parseInt(ADMIN_ID), {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          isBlocked
+            ? {
+                text: `send`,
+                callback_data: `send`,
+              }
+            : {
+                text: `block`,
+                callback_data: `block//${id}//${
+                  (
+                    await ctx.copyMessage(parseInt(CHANNEL))
+                  ).message_id
+                }`,
+              },
+        ],
+      ],
+    },
+  });
+  return;
+});
+
+bot.action(`send`, async (ctx) => {
+  await ctx.copyMessage(channel);
+  return await ctx.editMessageReplyMarkup({
+    inline_keyboard: [
+      [ctx.callbackQuery.message.reply_markup.inline_keyboard[0][0]],
+    ],
+  });
+});
+
+bot.action(/^block/g, async (ctx) => {
+  const [_, id, msg] = ctx.callbackQuery.data.split(`//`);
+  ctx.callbackQuery.message.reply_markup.inline_keyboard[0][1] = {
+    text: `send`,
+    callback_data: `send`,
+  };
+  await blocked.insertOne({ id });
+  await bot.telegram.deleteMessage(channel, msg);
+  return await ctx.editMessageReplyMarkup(
+    ctx.callbackQuery.message.reply_markup
+  );
+});
 
 (async () => {
   app.use(await bot.createWebhook({ domain: VERCEL_URL }));
-
   app.listen(PORT, () => console.log("Listening on port", PORT));
 })();
 
