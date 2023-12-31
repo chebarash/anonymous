@@ -2,7 +2,7 @@ const rules = {
   "No Hate Speech or Bullying": `Make sure everyone feels safe. Bullying of any kind isn't allowed, and degrading comments about race, religion, culture, sexual orientation, gender, or identity will not be tolerated.`,
   "No Spam": `Self-promotion, spam, and irrelevant links aren't allowed. This also includes flooding the channel with overly frequent or repetitive messages.`,
   "Content Standards": `No explicit content. This includes but is not limited to graphic violence, adult content, and gore. Such posts will be removed.`,
-  "No Harassmen": `Sending threats or harassment to others or advocating for violence against others in any form will result in immediate removal and a possible ban.`,
+  "No Harassment": `Sending threats or harassment to others or advocating for violence against others in any form will result in immediate removal and a possible ban.`,
 };
 
 const tips = {
