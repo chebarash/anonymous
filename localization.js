@@ -20,7 +20,7 @@ module.exports = {
   start: `The bot sends your messages completely anonymously to @puanonymous immediately.\n\nHowever, as soon as you break the /rules, you may be blocked and your messages will be sent after the admin’s approval.\n\nMoreover, there are several /tips to make your user experience better.`,
   rules: `<b>Very important rules:</b>\n\n${toList(
     rules
-  )}\n\nIf you see something that breaks the rules, report it. We rely on our community members to help keep this space clean and respectful.\n\nAnd also for security purposes, all links and marks are sent to the channel after confirmation by the admin.`,
+  )}\n\nIf you see something that breaks the rules, report it. We rely on our community members to help keep this space clean and respectful.\n\nAnd also for security purposes, all links and mentions are sent to the channel after confirmation by the admin.`,
   tips: `<b>A few tips to make your bot experience better:</b>\n\n${toList(
     tips
   )}`,
