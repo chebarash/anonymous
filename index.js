@@ -39,11 +39,13 @@ bot.command(`tips`, (ctx) => ctx.reply(tips, { parse_mode: `HTML` }));
 bot.on(message(), async (ctx) => {
   const {
     from: { id },
-    message: { entities },
+    message: { entities, caption_entities },
   } = ctx;
 
   const isBlocked = await blocked.findOne({ id: `${id}` });
-  const isUrl = entities?.find(({ type }) => forbidden.includes(type));
+  const isUrl = (entities || caption_entities).find(({ type }) =>
+    forbidden.includes(type)
+  );
 
   await ctx.copyMessage(adminId, {
     reply_markup: {
