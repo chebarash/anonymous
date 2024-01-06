@@ -43,7 +43,7 @@ bot.on(message(), async (ctx) => {
   } = ctx;
 
   const isBlocked = await blocked.findOne({ id: `${id}` });
-  const isUrl = (entities || caption_entities).find(({ type }) =>
+  const isUrl = (entities || caption_entities)?.find(({ type }) =>
     forbidden.includes(type)
   );
 
