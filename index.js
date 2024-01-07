@@ -1,15 +1,40 @@
 require(`dotenv`).config();
-const { Telegraf } = require(`telegraf`);
+const { Telegraf, Context } = require(`telegraf`);
 const { message } = require("telegraf/filters");
 const express = require(`express`);
 const { MongoClient } = require("mongodb");
-const { start, rules, tips } = require("./localization");
+const {
+  start,
+  rules,
+  tips,
+  del,
+  send,
+  unblock,
+  block,
+  cancel,
+} = require("./localization");
 
 const { CHANNEL, ADMIN_ID, TOKEN, VERCEL_URL, PORT, MONGODB_URI } = process.env;
 
 const forbidden = [`url`, `text_link`, `mention`];
 
-const bot = new Telegraf(TOKEN);
+class MyContext extends Context {
+  constructor(update, telegram, options) {
+    super(update, telegram, options);
+  }
+
+  updKb(index, bt) {
+    const { inline_keyboard } = this.callbackQuery.message.reply_markup;
+    inline_keyboard[0][index] = bt;
+    return this.editMessageReplyMarkup({ inline_keyboard });
+  }
+
+  getId() {
+    return this.callbackQuery.data.split(`//`)[1];
+  }
+}
+
+const bot = new Telegraf(TOKEN, { contextType: MyContext });
 const app = express();
 
 const channel = parseInt(CHANNEL);
@@ -19,16 +44,36 @@ const client = new MongoClient(MONGODB_URI);
 const database = client.db("anonymous");
 const blocked = database.collection("blocked");
 
+const btMsg = (msgId) => ({
+  text: msgId ? del : send,
+  callback_data: `${msgId ? `delete//${msgId}` : `send`}`,
+});
+const btAct = (isBlocked, id) => ({
+  text: isBlocked ? unblock : block,
+  callback_data: `${isBlocked ? `unblock` : `block`}//${id}`,
+});
+
+const sendAdmin = async (msg) => {
+  try {
+    await bot.telegram.sendMessage(
+      adminId,
+      `<pre><code class="language-json">${JSON.stringify(
+        msg,
+        null,
+        2
+      )}</code></pre>`,
+      { parse_mode: `HTML` }
+    );
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 bot.use(async (_ctx, next) => {
   try {
     await next();
   } catch (e) {
-    const error = JSON.stringify(e, null, 2);
-    await bot.telegram.sendMessage(
-      adminId,
-      `<pre><code class="language-json">${error}</code></pre>`,
-      { parse_mode: `HTML` }
-    );
+    sendAdmin({ message: e.message, ...e });
   }
 });
 
@@ -47,20 +92,18 @@ bot.on(message(), async (ctx) => {
     forbidden.includes(type)
   );
 
+  const msgId =
+    isBlocked || isUrl
+      ? undefined
+      : (await ctx.copyMessage(channel)).message_id;
+
   await ctx.copyMessage(adminId, {
     reply_markup: {
       inline_keyboard: [
         [
-          isBlocked || isUrl
-            ? { text: `send`, callback_data: `send` }
-            : {
-                text: `block`,
-                callback_data: `block//${id}//${
-                  (
-                    await ctx.copyMessage(channel)
-                  ).message_id
-                }`,
-              },
+          btMsg(msgId),
+          btAct(isBlocked, id),
+          { text: cancel, callback_data: `cancel` },
         ],
       ],
     },
@@ -68,22 +111,32 @@ bot.on(message(), async (ctx) => {
 });
 
 bot.action(`send`, async (ctx) => {
-  await ctx.copyMessage(channel);
-  return await ctx.deleteMessage();
+  const { message_id } = await ctx.copyMessage(channel);
+  return await ctx.updKb(0, btMsg(message_id));
+});
+
+bot.action(/^delete/g, async (ctx) => {
+  await bot.telegram.deleteMessage(channel, ctx.getId());
+  return await ctx.updKb(0, btMsg());
 });
 
 bot.action(/^block/g, async (ctx) => {
-  const [_, id, msg] = ctx.callbackQuery.data.split(`//`);
+  const id = ctx.getId();
   await blocked.insertOne({ id });
-  await bot.telegram.deleteMessage(channel, msg);
-  return await ctx.editMessageReplyMarkup({
-    inline_keyboard: [[{ text: `send`, callback_data: `send` }]],
-  });
+  return await ctx.updKb(1, btAct(true, id));
 });
+
+bot.action(/^unblock/g, async (ctx) => {
+  const id = ctx.getId();
+  await blocked.deleteOne({ id });
+  return await ctx.updKb(1, btAct(false, id));
+});
+
+bot.action(`cancel`, async (ctx) => await ctx.deleteMessage());
 
 (async () => {
   app.use(await bot.createWebhook({ domain: VERCEL_URL }));
-  app.listen(PORT, () => console.log("Listening on port", PORT));
+  app.listen(PORT, () => sendAdmin({ "Listening on port": PORT }));
 })();
 
 module.exports = app;

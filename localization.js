@@ -3,6 +3,7 @@ const rules = {
   "No Spam": `Self-promotion, spam, and irrelevant links aren't allowed. This also includes flooding the channel with overly frequent or repetitive messages.`,
   "Content Standards": `No explicit content. This includes but is not limited to graphic violence, adult content, and gore. Such posts will be removed.`,
   "No Harassment": `Sending threats or harassment to others or advocating for violence against others in any form will result in immediate removal and a possible ban.`,
+  "No Ads": `Any advertising must be approved by the administrator. Actions that do not comply with the requirements may result in the message being deleted or the user being blocked.`,
 };
 
 const tips = {
@@ -24,4 +25,9 @@ module.exports = {
   tips: `<b>A few tips to make your bot experience better:</b>\n\n${toList(
     tips
   )}`,
+  del: `🗑`,
+  send: `💬`,
+  unblock: `🔔`,
+  block: `🔕`,
+  cancel: `❌`,
 };
