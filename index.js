@@ -12,6 +12,10 @@ const {
   unblock,
   block,
   cancel,
+  toAdmin,
+  toChannel,
+  isBlocked,
+  isUnblocked,
 } = require("./localization");
 
 const { CHANNEL, ADMIN_ID, TOKEN, VERCEL_URL, PORT, MONGODB_URI } = process.env;
@@ -108,6 +112,8 @@ bot.on(message(), async (ctx) => {
       ],
     },
   });
+
+  await ctx.reply(isBlocked || isUrl ? toAdmin : toChannel);
 });
 
 bot.action(`send`, async (ctx) => {
@@ -123,12 +129,14 @@ bot.action(/^delete/g, async (ctx) => {
 bot.action(/^block/g, async (ctx) => {
   const id = ctx.getId();
   await blocked.insertOne({ id });
+  await bot.telegram.sendMessage(id, isBlocked);
   return await ctx.updKb(1, btAct(true, id));
 });
 
 bot.action(/^unblock/g, async (ctx) => {
   const id = ctx.getId();
-  await blocked.deleteOne({ id });
+  await blocked.deleteMany({ id });
+  await bot.telegram.sendMessage(id, isUnblocked);
   return await ctx.updKb(1, btAct(false, id));
 });
 

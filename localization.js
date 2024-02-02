@@ -30,4 +30,8 @@ module.exports = {
   unblock: `🔔`,
   block: `🔕`,
   cancel: `❌`,
+  toChannel: `Your message has been sent to the channel.`,
+  toAdmin: `Your message has been sent to the admin and will be posted to the channel after moderation.`,
+  isBlocked: `You have been blocked for violating channel /rules.`,
+  isUnblocked: `The admin took pity on you and unblocked you, now be a good boy)`,
 };
