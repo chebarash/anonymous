@@ -4,6 +4,7 @@ const rules = {
   "Content Standards": `No explicit content. This includes but is not limited to graphic violence, adult content, and gore. Such posts will be removed.`,
   "No Harassment": `Sending threats or harassment to others or advocating for violence against others in any form will result in immediate removal and a possible ban.`,
   "No Ads": `Any advertising must be approved by the administrator. Actions that do not comply with the requirements may result in the message being deleted or the user being blocked.`,
+  "No Love-related Texts": `Refrain from sharing love-related texts to maintain a professional and respectful atmosphere for all participants.`,
 };
 
 const tips = {
