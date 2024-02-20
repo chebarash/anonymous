@@ -73,19 +73,30 @@ const sendAdmin = async (msg) => {
   }
 };
 
-bot.use(async (_ctx, next) => {
+bot.use(async (ctx, next) => {
   try {
     await next();
   } catch (e) {
-    sendAdmin({ message: e.message, ...e });
+    sendAdmin({ message: e.message, ...e, update: ctx.update });
   }
 });
 
 bot.start((ctx) => ctx.reply(start));
 bot.command(`rules`, (ctx) => ctx.reply(rules, { parse_mode: `HTML` }));
 bot.command(`tips`, (ctx) => ctx.reply(tips, { parse_mode: `HTML` }));
+bot.command(`anon`, async (ctx) => {
+  const {
+    text,
+    reply_to_message: { message_id },
+  } = ctx.message;
+  await ctx.reply(text.replace(`/anon `, ``), {
+    reply_to_message_id: message_id,
+  });
+  await ctx.deleteMessage();
+});
 
 bot.on(message(), async (ctx) => {
+  if (ctx.chat.type != "private") return;
   const {
     from: { id },
     message: { entities, caption_entities },

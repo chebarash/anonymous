@@ -9,6 +9,7 @@ const rules = {
 
 const tips = {
   "Reply to message": ` If you want to reply to someone from the channel, you can simply select "reply in another chat" then select me and reply to him.`,
+  "Anonymous comment": ` You can anonymously reply to a channel post by simply starting your message with <code>/anon</code>.`,
   "Open source": `This bot is completely anonymous and you can verify by opening the <a href="https://github.com/chebarash/anonymous">source code</a>.`,
   Support: `If you still have questions or suggestions, just contact <a href="http://t.me/chbrsh">my developer</a>.`,
 };
